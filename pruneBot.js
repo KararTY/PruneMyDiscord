@@ -41,7 +41,7 @@ const fetchMore = (channel, before) => {
         if (msg.last().author.id === client.user.id) msgLast = msg.array()[msg.array().length - 1].id
         else msgLast = msg.last().id
         msg.forEach(msg => {
-          if (msg.author.id === '95609135915073536') {
+          if (msg.author.id === client.user.id) {
             let channelID = msg.channel.id
             msg.delete().then(msg => {
               count++
