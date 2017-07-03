@@ -13,6 +13,6 @@ Prune (Delete) all of your Discord messages in a guild.
   let guildID = ''
 
   // Leave this empty if you want to delete all of your messages in all guild channels.
-  let channelID = ''
-  ```
-4. Open up your terminal / cmd and go to the directory and type `node pruneBot.js`.
+  let channelID = ''```
+  
+ 4. Open up your terminal / cmd and go to the directory and type `node pruneBot.js`.
