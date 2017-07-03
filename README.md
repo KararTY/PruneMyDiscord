@@ -3,7 +3,7 @@ Prune (Delete) all of your Discord messages in a guild.
 
 ## Setup
  1. Install NodeJS
- 2. Download the files (Either through `git clone` or just downloading each file 1 by 1).
+ 2. Download the files (Either through `git clone` or just downloading each file 1 by 1 - You only need pruneBot.js & package.json).
  3. Go into pruneBot.js and change the variables at the top:
  ```js
    // Your auth token.
