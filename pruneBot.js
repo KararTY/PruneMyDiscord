@@ -4,8 +4,8 @@ const client = new Client()
 // Your auth token.
 let authToken = ''
 
-// Delete a DM channel. 
-let dmChannel = true
+// Enable this to delete messages in a DM channel. 
+let dmChannel = false
 
 // The guild you want to delete your messages in.
 let guildID = ''
