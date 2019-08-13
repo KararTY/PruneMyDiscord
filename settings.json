@@ -1,0 +1,10 @@
+{
+  "authToken": "",
+  "channels": {
+    "groups": [],
+    "dms": [],
+    "guilds": {}
+  },
+  "auto": false,
+  "debug": true
+}
