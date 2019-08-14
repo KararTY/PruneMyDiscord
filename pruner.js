@@ -28,7 +28,7 @@ class Pruner {
             await fetchMore({ count: { deleted: 0, parsed: 0 }, settings: this.settings, ui }, channel)
           } catch (e) {
             console.error(e)
-            process.exit(1)
+            return process.exit(1)
           }
         }
       }
@@ -36,7 +36,7 @@ class Pruner {
     }
     if (!this.settings.auto) ui.updateBottomBar(green(`Finished.`))
     else console.log(green('Finished.'))
-    process.exit()
+    return process.exit()
   }
 }
 
@@ -52,7 +52,7 @@ async function fetchMore ({ count, settings, ui }, channel, before) {
     if (messages.last().author.id === channel.client.user.id) msgLast = messages.array()[messages.array().length - 1].id
     else msgLast = messages.last().id
     if (!settings.auto) ui.updateBottomBar(green(`Out of ${bold(count.parsed)} messages, ${bold(count.deleted)} have been pruned so far in ${bold(channelTitle(channel))} ${bold(channelName(channel))}...`))
-    await Promise.all(userMessages.deleteAll())
+    await Promise.all(userMessages.deleteAll()) // Wait for all messages to be successfully deleted before moving on.
     count.deleted += userMessages.size
     return fetchMore({ count, settings, ui }, channel, msgLast)
   } else {

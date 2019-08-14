@@ -31,4 +31,15 @@ try {
   saveSettings(settings)
 }
 
-module.exports = { colors: { red, green, gray, blue, bold, underline }, settings, rx }
+module.exports = {
+  colors: {
+    red,
+    green,
+    gray,
+    blue,
+    bold,
+    underline
+  },
+  settings,
+  rx
+}

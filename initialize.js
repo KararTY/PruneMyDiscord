@@ -10,7 +10,9 @@ const {
   colors: {
     red,
     green,
-    bold
+    blue,
+    bold,
+    underline
   },
   settings,
   rx: {
@@ -18,14 +20,35 @@ const {
   }
 } = require('./dependencies')
 
+const questions = {
+  firstStart: {
+    type: 'list',
+    name: 'acceptTOS',
+    message: `Have you read and accepted Discord's Developer Terms of Service?\n${blue(underline('https://discordapp.com/developers/docs/legal'))}\nDo you understand that you have to take all\nresponsibility for any and all consequences as a\nresult of running this script?\n`,
+    choices: ['Yes', 'No']
+  },
+  askForToken: {
+    type: 'password',
+    name: 'authToken',
+    mask: '*',
+    message: 'Please enter your Discord Authentication token:\n',
+    validate: (val) => {
+      val = val.trim().replace(/[ ]+/g, '')
+      if (val.length === 0) {
+        throw new Error('Invalid token length. Try again.')
+      } else return true
+    }
+  }
+}
+
 const Pruner = require('./pruner')
 
-const questions = require('./questions')
 const ui = new cli.ui.BottomBar()
 const prompts = new Subject()
 
 cli.prompt(prompts).ui.process.subscribe(onAnswer, (err) => {
   console.error(err)
+  process.exit(1)
 }, null)
 
 function listGuildsPrompt () {
@@ -91,7 +114,7 @@ function listGuildsPrompt () {
     })
   }
 
-  prompts.next(prompt)
+  return prompts.next(prompt)
 }
 
 function listGuildChannelsPrompt (guilds) {
@@ -162,14 +185,14 @@ function listGuildChannelsPrompt (guilds) {
     })
   }
 
-  prompts.next(prompt)
+  return prompts.next(prompt)
 }
 
 function attemptLogin (answer) {
   ui.log.write('Attempting to authenticate...')
   discord.once('ready', () => {
     ui.log.write(green(`Success: ${bold('Discord account authenticated.')}`))
-    return listGuildsPrompt()
+    listGuildsPrompt()
   }).login(answer).catch((e) => {
     if (settings.debug) console.error(e)
     ui.log.write(red(`Error: ${bold(e.message)}`))
@@ -183,13 +206,14 @@ function onAnswer (question) {
   switch (question.name) {
     case 'acceptTOS':
       if (answer === 'Yes') {
-        if (settings.authToken.length > 0) attemptLogin(settings.authToken)
+        if (settings.authToken.length > 0) return attemptLogin(settings.authToken)
         else return prompts.next(questions.askForToken)
-      } else ui.log.write(red(`ToS not accepted, aborting script.`))
-      break
+      } else {
+        ui.log.write(red(`ToS not accepted, aborting script.`))
+        return process.exit(1)
+      }
     case 'authToken':
-      attemptLogin(answer)
-      break
+      return attemptLogin(answer)
     case 'choosenGuilds':
       const guilds = [...new Set(answer.filter(choice => choice.type === 'guild').map(guild => guild.id).flat())]
       const groups = [...new Set(answer.filter(choice => choice.type === 'groups').map(group => group.id).flat())]
@@ -197,9 +221,13 @@ function onAnswer (question) {
       settings.channels.groups = groups.length > 0 ? groups : []
       settings.channels.dms = dms.length > 0 ? dms : []
       if (guilds.length > 0) {
-        listGuildChannelsPrompt(guilds)
+        return listGuildChannelsPrompt(guilds)
+      } else {
+        fs.writeFileSync(path.join(__dirname, 'settings.json'), JSON.stringify(settings, null, 2))
+        if (settings.debug) console.table(settings.channels)
+        const pruner = new Pruner(discord, settings)
+        return pruner.start(ui)
       }
-      break
     case 'choosenGuildChannels':
       const parsedGuildsAndChannels = {}
       answer.forEach(channel => {
@@ -212,8 +240,7 @@ function onAnswer (question) {
       fs.writeFileSync(path.join(__dirname, 'settings.json'), JSON.stringify(settings, null, 2))
       if (settings.debug) console.table(settings.channels)
       const pruner = new Pruner(discord, settings)
-      pruner.start(ui)
-      break
+      return pruner.start(ui)
   }
 }
 
@@ -232,10 +259,12 @@ if (settings.auto) {
     const dms = argv.dms ? argv.dms.split(',').filter(Boolean).map(val => val.replace(/ /g, '')) : []
     if (settings.debug) console.table([guilds, groups, dms])
 
-    // Rewrite in memory only.
-    settings.channels.guilds = guilds
-    settings.channels.groups = groups
-    settings.channels.dms = dms
+    if (argv.guilds || argv.groups || argv.dms) {
+      // Rewrite in memory only.
+      settings.channels.guilds = guilds
+      settings.channels.groups = groups
+      settings.channels.dms = dms
+    }
 
     const pruner = new Pruner(discord, settings)
     pruner.start()
