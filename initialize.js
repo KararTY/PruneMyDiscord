@@ -6,6 +6,8 @@ const cli = require('inquirer')
 const { Client } = require('discord.js')
 const discord = new Client()
 
+const argv = require('minimist')(process.argv.slice(2), { string: ['token', 'guilds', 'groups', 'dms'], alias: { t: 'token', g: 'guilds', c: 'groups', d: 'dms' } })
+
 const {
   colors: {
     red,
@@ -244,8 +246,7 @@ function onAnswer (question) {
   }
 }
 
-if (settings.auto) {
-  const argv = require('minimist')(process.argv.slice(2), { string: ['token', 'guilds', 'groups', 'dms'] })
+if (settings.auto || argv.guilds || argv.groups || argv.dms) {
   discord.login(argv.token ? argv.token.replace(/ /g, '') : settings.authToken).catch(e => { console.error(e); process.exit() })
   discord.once('ready', () => {
     const guilds = {}

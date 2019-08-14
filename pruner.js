@@ -7,7 +7,7 @@ class Pruner {
   }
 
   async start (ui) {
-    if (!this.settings.auto) ui.log.write(green('Preparing pruner...'))
+    log(green('Preparing pruner...'), this.settings, ui)
     const types = [
       ['guilds', Object.entries(this.settings.channels.guilds)],
       ['groups', this.settings.channels.groups],
@@ -34,7 +34,7 @@ class Pruner {
       }
       if (this.settings.debug) log(gray(`Done with ${type[0]}.`), this.settings, ui)
     }
-    if (!this.settings.auto) ui.updateBottomBar(green(`Finished.`))
+    if (!this.settings.auto && ui) ui.updateBottomBar(green(`Finished.`))
     else console.log(green('Finished.'))
     return process.exit()
   }
@@ -51,7 +51,7 @@ async function fetchMore ({ count, settings, ui }, channel, before) {
     let msgLast
     if (messages.last().author.id === channel.client.user.id) msgLast = messages.array()[messages.array().length - 1].id
     else msgLast = messages.last().id
-    if (!settings.auto) ui.updateBottomBar(green(`Out of ${bold(count.parsed)} messages, ${bold(count.deleted)} have been pruned so far in ${bold(channelTitle(channel))} ${bold(channelName(channel))}...`))
+    if (!settings.auto && ui) ui.updateBottomBar(green(`Out of ${bold(count.parsed)} messages, ${bold(count.deleted)} have been pruned so far in ${bold(channelTitle(channel))} ${bold(channelName(channel))}...`))
     await Promise.all(userMessages.deleteAll()) // Wait for all messages to be successfully deleted before moving on.
     count.deleted += userMessages.size
     return fetchMore({ count, settings, ui }, channel, msgLast)
@@ -62,7 +62,7 @@ async function fetchMore ({ count, settings, ui }, channel, before) {
 }
 
 function log (message, settings, ui) {
-  if (!settings.auto) ui.log.write(message)
+  if (!settings.auto && ui) ui.log.write(message)
   else console.log(message)
 }
 
