@@ -28,7 +28,7 @@ class Pruner {
             await fetchMore({ count: { deleted: 0, parsed: 0 }, settings: this.settings, ui }, channel)
           } catch (e) {
             console.error(e)
-            return process.exit(1)
+            process.exitCode = 1
           }
         }
       }
@@ -36,7 +36,7 @@ class Pruner {
     }
     if (!this.settings.auto && ui) ui.updateBottomBar(green(`Finished.`))
     else console.log(green('Finished.'))
-    return process.exit()
+    process.exitCode = 0
   }
 }
 

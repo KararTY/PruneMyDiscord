@@ -50,7 +50,7 @@ const prompts = new Subject()
 
 cli.prompt(prompts).ui.process.subscribe(onAnswer, (err) => {
   console.error(err)
-  process.exit(1)
+  process.exitCode = 1
 }, null)
 
 function listGuildsPrompt () {
@@ -212,8 +212,9 @@ function onAnswer (question) {
         else return prompts.next(questions.askForToken)
       } else {
         ui.log.write(red(`ToS not accepted, aborting script.`))
-        return process.exit(1)
+        process.exitCode = 1
       }
+      break
     case 'authToken':
       return attemptLogin(answer)
     case 'choosenGuilds':
@@ -247,7 +248,7 @@ function onAnswer (question) {
 }
 
 if (settings.auto || argv.guilds || argv.groups || argv.dms) {
-  discord.login(argv.token ? argv.token.replace(/ /g, '') : settings.authToken).catch(e => { console.error(e); process.exit() })
+  discord.login(argv.token ? argv.token.replace(/ /g, '') : settings.authToken).catch(e => { console.error(e); process.exitCode = 1 })
   discord.once('ready', () => {
     const guilds = {}
     if (argv.guilds) {
