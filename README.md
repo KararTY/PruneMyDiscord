@@ -2,7 +2,7 @@
 Prune (Delete) all of your Discord messages in a guild.
 
 ## Setup
- 1. Install NodeJS.
+ 1. Install NodeJS, **version >12.x.x** required.
  2. Download the files (Either through `git clone` or through "Download ZIP").
  3. Open up your terminal / cmd, traverse to your director using `cd` and run `npm install` to install dependencies.
  4. And then finally run `npm start` to start the script.
